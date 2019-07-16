@@ -102,3 +102,11 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# OSX
+.DS_Store
+
+# data files
+labeled_fbo_docs/
+srt.train
+srt.validation
