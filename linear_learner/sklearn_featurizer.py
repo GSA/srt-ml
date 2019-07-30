@@ -8,10 +8,16 @@ import os
 import re
 import shutil
 import string
+import subprocess as sb 
 import sys
 import time
 
-import nltk  
+try:
+    import nltk  
+except ModuleNotFoundError:
+    # pip install nltk without going the custom dockerfile route
+    sb.call([sys.executable, "-m", "pip", "install", nltk]) 
+    import nltk
 import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
