@@ -11,6 +11,7 @@ boto3 = "*"
 nltk = "*"
 ipykernel = "*"
 awscli = "*"
+pandas = "*"
 
 [requires]
 python_version = "3.7"
