@@ -14,7 +14,7 @@ import time
 
 try:
     import nltk  
-except ModuleNotFoundError:
+except ImportError:
     # pip install nltk without going the custom dockerfile route
     sb.call([sys.executable, "-m", "pip", "install", nltk]) 
     import nltk
