@@ -132,7 +132,7 @@ if __name__ == '__main__':
                           'the data specification in S3 was incorrectly specified or the role specified\n' +
                           'does not have permission to access the data.').format(args.train, "train"))
     input_file = input_files[0]
-    logger.info(f"Creating a pandas DataFrame out of {input_file}")
+    logger.info("Creating a pandas DataFrame out of {}".format(input_file))
     df = pd.read_csv(input_file, 
                      header=None,
                      names=['target', 'text'],
@@ -150,13 +150,13 @@ if __name__ == '__main__':
     preprocessor = ColumnTransformer(transformers=[('txt', 
                                                     text_transformer, 
                                                     ['text'])])
-    logger.info(f"Fitting preprocessor...")
+    logger.info("Fitting preprocessor...")
     preprocessor.fit(df)
-    logger.info(f"Done fitting preprocessor!")
+    logger.info("Done fitting preprocessor!")
     
     joblib.dump(preprocessor, os.path.join(args.model_dir, "model.joblib"))
 
-    logger.info(f"Saved model!")
+    logger.info("Saved model!")
     
     
 def input_fn(input_data, content_type):
