@@ -15,8 +15,9 @@ import time
 try:
     import nltk  
 except ImportError:
-    # pip install nltk without going the custom dockerfile route
-    sb.call([sys.executable, "-m", "pip", "install", 'nltk']) 
+    # pip install nltk and singledispatch without going the custom dockerfile route
+    sb.call([sys.executable, "-m", "pip", "install", "nltk"]) 
+    sb.call([sys.executable, "-m", "pip", "install", "singledispatch"])
     import nltk
 import numpy as np
 import pandas as pd
@@ -111,31 +112,22 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    # Take the set of labeled files and read them all into a single pandas dataframe
-    data = []
-    for f in os.listdir(args.train):
-        if f.startswith('GREEN'):
-            target = 1
-        elif f.startswith('RED') or f.startswith('YELLOW'):
-            target = 0
-        else:
-            raise Exception("A file isn't prepended with the target: {}".format(f))
-
-        file_path = os.path.join(os.getcwd(), args.train, f)
-        with open(file_path, 'r', errors = 'ignore') as fp:
-            text = fp.read()
-        data.append((target, text))
-    
-    if len(data) == 0:
-        raise ValueError(('There are no files in {}.\n' +
+    input_files = [ os.path.join(args.train, file) for file in os.listdir(args.train) ]
+    if len(input_files) == 0:
+        raise ValueError(('There is no file in {}.\n' +
+                          'This usually indicates that the channel ({}) was incorrectly specified,\n' +
+                          'the data specification in S3 was incorrectly specified or the role specified\n' +
+                          'does not have permission to access the data.').format(args.train, "train"))
+    elif len(input_files) != 1:
+        raise ValueError(('There is more than one file in {}.\n' +
                           'This usually indicates that the channel ({}) was incorrectly specified,\n' +
                           'the data specification in S3 was incorrectly specified or the role specified\n' +
                           'does not have permission to access the data.').format(args.train, "train"))
     
-    df = pd.DataFrame(data)
-    df.columns = ['target', 'text']
-    df['target'] = df['target'].astype(np.float64)
-    df['text'] = df['text'].astype(str)
+    df = pd.read_csv(input_files[0], 
+                     header=None,
+                     names=['target', 'text'],
+                     dtype={'target': np.float64, 'text': str})
 
     # We will train our classifier w/ just one feature: The documment text
     text_transformer = Pipeline(steps=[
@@ -144,7 +136,7 @@ if __name__ == '__main__':
                                        ngram_range=(1,2),
                                        sublinear_tf=True)),
         # TODO: consider SelectKBest w/ chi2 for univariate feature selection 
-        ('select', TruncatedSVD(n_components=100, n_iter=50))])
+        ('select', TruncatedSVD(n_components=100, n_iter=5))])
 
     preprocessor = ColumnTransformer(transformers=[('txt', 
                                                     text_transformer, 
