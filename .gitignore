@@ -110,3 +110,4 @@ venv.bak/
 labeled_fbo_docs/
 srt.train
 srt.validation
+*.csv
