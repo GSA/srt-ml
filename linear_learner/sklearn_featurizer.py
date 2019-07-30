@@ -16,7 +16,7 @@ try:
     import nltk  
 except ImportError:
     # pip install nltk without going the custom dockerfile route
-    sb.call([sys.executable, "-m", "pip", "install", nltk]) 
+    sb.call([sys.executable, "-m", "pip", "install", 'nltk']) 
     import nltk
 import numpy as np
 import pandas as pd
