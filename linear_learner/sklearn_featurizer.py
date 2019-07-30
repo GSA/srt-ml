@@ -4,6 +4,7 @@ import argparse
 import csv
 from io import StringIO
 import json
+import logging
 import os
 import re
 import shutil
@@ -16,8 +17,8 @@ try:
     import nltk  
 except ImportError:
     # pip install nltk and singledispatch without going the custom dockerfile route
-    sb.call([sys.executable, "-m", "pip", "install", "nltk"]) 
     sb.call([sys.executable, "-m", "pip", "install", "singledispatch"])
+    sb.call([sys.executable, "-m", "pip", "install", "nltk"]) 
     import nltk
 import numpy as np
 import pandas as pd
@@ -46,6 +47,8 @@ try:
 except LookupError:
     nltk.download('punkt')
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 class LemmaTokenizer(object):
 
@@ -128,8 +131,9 @@ if __name__ == '__main__':
                           'This usually indicates that the channel ({}) was incorrectly specified,\n' +
                           'the data specification in S3 was incorrectly specified or the role specified\n' +
                           'does not have permission to access the data.').format(args.train, "train"))
-    
-    df = pd.read_csv(input_files[0], 
+    input_file = input_files[0]
+    logger.info(f"Creating a pandas DataFrame out of {input_file}")
+    df = pd.read_csv(input_file, 
                      header=None,
                      names=['target', 'text'],
                      dtype={'target': np.float64, 'text': str})
@@ -146,12 +150,13 @@ if __name__ == '__main__':
     preprocessor = ColumnTransformer(transformers=[('txt', 
                                                     text_transformer, 
                                                     ['text'])])
-
+    logger.info(f"Fitting preprocessor...")
     preprocessor.fit(df)
-
+    logger.info(f"Done fitting preprocessor!")
+    
     joblib.dump(preprocessor, os.path.join(args.model_dir, "model.joblib"))
 
-    print("saved model!")
+    logger.info(f"Saved model!")
     
     
 def input_fn(input_data, content_type):
