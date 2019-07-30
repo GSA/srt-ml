@@ -66,4 +66,4 @@ Then you'll push these files to your S3 bucket. Make sure you adust the name of 
 
 ## License
 
-This project is licensed under the Creative Commons Zero v1.0 Universal License - see the [LICENSE.md](https://github.com/GSA/sagemaker-pilot/blob/master/LICENSE) file for details.
+This project is licensed under the Creative Commons Zero v1.0 Universal License - see the [LICENSE.md](https://github.com/GSA/sagemaker-pilot/blob/master/.github/LICENSE) file for details.
