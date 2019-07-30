@@ -41,6 +41,11 @@ try:
 except LookupError:
     nltk.download('wordnet')
 
+try:
+    nltk.data.find('punkt')
+except LookupError:
+    nltk.download('punkt')
+
 
 class LemmaTokenizer(object):
 
