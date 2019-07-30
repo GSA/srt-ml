@@ -4,7 +4,6 @@ import argparse
 import csv
 from io import StringIO
 import json
-import logging
 import os
 import re
 import shutil
@@ -47,8 +46,6 @@ try:
 except LookupError:
     nltk.download('punkt')
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 class LemmaTokenizer(object):
 
@@ -133,12 +130,11 @@ if __name__ == '__main__':
                           'the data specification in S3 was incorrectly specified or the role specified\n' +
                           'does not have permission to access the data.').format(args.train, "train"))
     input_file = input_files[0]
-    logger.info("Creating a pandas DataFrame out of {}".format(input_file))
+    print("Creating a pandas DataFrame out of {}".format(input_file))
     df = pd.read_csv(input_file, 
                      header=None,
                      names=['target', 'text'],
-                     dtype={'target': np.float64, 'text': str})
-    print(df.head())                 
+                     dtype={'target': np.float64, 'text': str})               
 
     # We will train our classifier w/ just one feature: The documment text
     text_transformer = Pipeline(steps=[
@@ -152,13 +148,13 @@ if __name__ == '__main__':
     preprocessor = ColumnTransformer(transformers=[('txt', 
                                                     text_transformer, 
                                                     ['text'])])
-    logger.info("Fitting preprocessor...")
+    print("Fitting preprocessor...")
     preprocessor.fit(df)
-    logger.info("Done fitting preprocessor!")
+    print("Done fitting preprocessor!")
     
     joblib.dump(preprocessor, os.path.join(args.model_dir, "model.joblib"))
 
-    logger.info("Saved model!")
+    print("Saved model!")
     
     
 def input_fn(input_data, content_type):
