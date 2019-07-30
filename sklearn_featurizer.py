@@ -120,7 +120,8 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    input_files = [ os.path.join(args.train, file) for file in os.listdir(args.train) ]
+    input_files = [ os.path.join(args.train, file) for file in os.listdir(args.train) 
+                    if file.endswith('.csv')]
     if len(input_files) == 0:
         raise ValueError(('There is no file in {}.\n' +
                           'This usually indicates that the channel ({}) was incorrectly specified,\n' +
