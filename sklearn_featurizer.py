@@ -138,6 +138,7 @@ if __name__ == '__main__':
                      header=None,
                      names=['target', 'text'],
                      dtype={'target': np.float64, 'text': str})
+    print(df.head())                 
 
     # We will train our classifier w/ just one feature: The documment text
     text_transformer = Pipeline(steps=[
