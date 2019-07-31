@@ -47,6 +47,12 @@ except LookupError:
     nltk.download('punkt')
 
 
+def lemma_tokenizer(doc):
+    wnl = nltk.stem.WordNetLemmatizer()
+    lemma_tokens = [wnl.lemmatize(t) for t in nltk.word_tokenize(doc)]
+
+    return lemma_tokens
+
 class LemmaTokenizer(object):
 
     def __init__(self):
@@ -151,7 +157,9 @@ if __name__ == '__main__':
     
     text_transformer = Pipeline(steps=[
         ('cleaner', TextPreprocessor()),
-        ('vectorizer', TfidfVectorizer()),
+        ('vectorizer', TfidfVectorizer(tokenizer=lemma_tokenizer,
+                                       ngram_range=(1,2),
+                                       sublinear_tf=True)),
         ('select', TruncatedSVD(n_components=100, n_iter=5))])
 
     preprocessor = ColumnTransformer(transformers=[('txt', text_transformer, ['text'])])
