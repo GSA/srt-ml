@@ -101,7 +101,7 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
             m = self.token_pattern.search(word)
             if not m:
                 continue
-            words += m.group() + ' '
+            words += m.group().strip() + ' '
         
         return words
     
@@ -157,7 +157,7 @@ if __name__ == '__main__':
     
     text_transformer = Pipeline(steps=[
         ('cleaner', TextPreprocessor()),
-        ('vectorizer', TfidfVectorizer(tokenizer=lemma_tokenizer,
+        ('vectorizer', TfidfVectorizer(analyzer=str.split,
                                        ngram_range=(1,2),
                                        sublinear_tf=True)),
         ('select', TruncatedSVD(n_components=100, n_iter=5))])
