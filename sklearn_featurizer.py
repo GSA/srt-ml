@@ -65,6 +65,7 @@ class LemmaTokenizer(object):
 class TextPreprocessor(BaseEstimator, TransformerMixin):
     
     def __init__(self):
+        self.wnl = nltk.stem.WordNetLemmatizer()
         self.control_regex = re.compile(r'[\s]|[a-z]|\b508\b|\b1973\b')
         self.token_pattern = re.compile(r'(?u)\b\w\w+\b')
         self.stopwords = {'ourselves', 'hers', 'between', 'yourself', 'but', 'again', 
@@ -90,20 +91,23 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
     
 
     def _preprocessing(self, doc):
-        # to be applied to a pandas Series
-        doc = doc.replace('\n',' ').strip().lower()
-        doc = "".join(self.control_regex.findall(doc))
-        doc = doc.split()
-        words = ''
-        for word in doc:
-            if word in self.stopwords:
+        # split at any white space and rejoin using a single space. Then lowercase.
+        doc_lowered = " ".join(doc.split()).lower()
+        tokens = self.control_regex.findall(doc_lowered)
+        lemma_tokens = []
+        for token in tokens:
+            if token in self.stopwords:
                 continue
-            m = self.token_pattern.search(word)
+            m = self.token_pattern.search(token)
             if not m:
                 continue
-            words += m.group().strip() + ' '
+            word = m.group().strip()
+            lemma = self.wnl.lemmatize(word)
+            lemma_tokens.append(lemma)
         
-        return words
+        processed_text = " ".join(lemma_tokens)
+        
+        return processed_text
     
     
     def transform(self, X, y = None):
