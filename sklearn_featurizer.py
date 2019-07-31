@@ -65,7 +65,6 @@ class LemmaTokenizer(object):
 class TextPreprocessor(BaseEstimator, TransformerMixin):
     
     def __init__(self):
-        self.wnl = nltk.stem.WordNetLemmatizer()
         self.control_regex = re.compile(r'[\s]|[a-z]|\b508\b|\b1973\b')
         self.token_pattern = re.compile(r'(?u)\b\w\w+\b')
         self.stopwords = {'ourselves', 'hers', 'between', 'yourself', 'but', 'again', 
@@ -93,8 +92,11 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
     def _preprocessing(self, doc):
         # split at any white space and rejoin using a single space. Then lowercase.
         doc_lowered = " ".join(doc.split()).lower()
-        tokens = self.control_regex.findall(doc_lowered)
-        lemma_tokens = []
+        # map punctuation to space
+        translator = str.maketrans(string.punctuation, ' '*len(string.punctuation)) 
+        doc_lowered = doc_lowered.translate(translator)
+        tokens = "".join(self.control_regex.findall(doc_lowered)).split()
+        processed_text = []
         for token in tokens:
             if token in self.stopwords:
                 continue
@@ -102,10 +104,9 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
             if not m:
                 continue
             word = m.group().strip()
-            lemma = self.wnl.lemmatize(word)
-            lemma_tokens.append(lemma)
+            processed_text.append(word)
         
-        processed_text = " ".join(lemma_tokens)
+        processed_text = " ".join(processed_text)
         
         return processed_text
     
@@ -140,24 +141,11 @@ if __name__ == '__main__':
                           'the data specification in S3 was incorrectly specified or the role specified\n' +
                           'does not have permission to access the data.').format(args.train, "train"))
     input_file = input_files[0]
-    print("Creating a pandas DataFrame out of {}".format(input_file))
+    
     df = pd.read_csv(input_file, 
                      header=None,
                      names=['target', 'text'],
                      dtype={'target': np.float64, 'text': str})               
-
-    # We will train our classifier w/ just one feature: The documment text
-    #text_transformer = Pipeline(steps=[
-        #('cleaner', TextPreprocessor()), 
-        #('vectorizer', TfidfVectorizer(tokenizer=LemmaTokenizer(),
-                                       #ngram_range=(1,2),
-                                       #sublinear_tf=True)),
-        # TODO: consider SelectKBest w/ chi2 for univariate feature selection 
-        #('select', TruncatedSVD(n_components=100, n_iter=5))])
-
-    #preprocessor = ColumnTransformer(
-        #transformers=[
-            #('txt', text_transformer, ['text'])])
     
     text_transformer = Pipeline(steps=[
         ('cleaner', TextPreprocessor()),
