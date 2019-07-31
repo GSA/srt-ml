@@ -156,6 +156,7 @@ if __name__ == '__main__':
 
     preprocessor = ColumnTransformer(transformers=[('txt', text_transformer, ['text'])])
     
+    print(nltk.data.path)
     print("Fitting preprocessor...")
     preprocessor.fit(df)
     print("Done fitting preprocessor!")
