@@ -107,6 +107,8 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
 
 
 if __name__ == '__main__':
+    import sklearn
+    print("sklearn version:  {}".format(sklearn.__version__))
 
     parser = argparse.ArgumentParser()
 
@@ -145,17 +147,10 @@ if __name__ == '__main__':
         # TODO: consider SelectKBest w/ chi2 for univariate feature selection 
         ('select', TruncatedSVD(n_components=100, n_iter=5))])
 
-    preprocessor = ColumnTransformer(transformers=[('txt', 
-                                                    text_transformer, 
-                                                    ['text'])])
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ('txt', text_transformer, ['text'])])
     
-    #testing to see if the preprocessor error occurs with nltk
-    print("Instantiating WordNetLemmatizer")
-    wnl = nltk.stem.WordNetLemmatizer()
-    doc = "This is a test of nltk's downloads. Can we find them?!"
-    print("Lemmatizing and tokenizing")
-    lemmas = [wnl.lemmatize(t) for t in nltk.word_tokenize(doc)]
-    print("Done lemmatizing and tokenizing!")
     
     print("Fitting preprocessor...")
     preprocessor.fit(df)
@@ -227,3 +222,4 @@ def model_fn(model_dir):
     """
     preprocessor = joblib.load(os.path.join(model_dir, "model.joblib"))
     return preprocessor
+    
