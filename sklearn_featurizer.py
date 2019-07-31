@@ -138,7 +138,7 @@ if __name__ == '__main__':
 
     # We will train our classifier w/ just one feature: The documment text
     #text_transformer = Pipeline(steps=[
-        #('preprocessor', TextPreprocessor()), 
+        #('cleaner', TextPreprocessor()), 
         #('vectorizer', TfidfVectorizer(tokenizer=LemmaTokenizer(),
                                        #ngram_range=(1,2),
                                        #sublinear_tf=True)),
@@ -149,7 +149,9 @@ if __name__ == '__main__':
         #transformers=[
             #('txt', text_transformer, ['text'])])
     
-    text_transformer = Pipeline(steps=[('vectorizer', TfidfVectorizer())])
+    text_transformer = Pipeline(steps=[
+        ('cleaner', TextPreprocessor()),
+        ('vectorizer', TfidfVectorizer())])
 
     preprocessor = ColumnTransformer(transformers=[('txt', text_transformer, ['text'])])
     
