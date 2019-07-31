@@ -36,30 +36,23 @@ from sagemaker_containers.beta.framework import (content_types,
                                                 transformer, 
                                                 worker)
 
-try:
-    nltk.data.find('wordnet')
-except LookupError:
-    nltk.download('wordnet')
+#try:
+    #nltk.data.find('wordnet')
+#except LookupError:
+    #nltk.download('wordnet')
 
-try:
-    nltk.data.find('punkt')
-except LookupError:
-    nltk.download('punkt')
+#try:
+    #nltk.data.find('punkt')
+#except LookupError:
+    #nltk.download('punkt')
 
+#class LemmaTokenizer(object):
 
-def lemma_tokenizer(doc):
-    wnl = nltk.stem.WordNetLemmatizer()
-    lemma_tokens = [wnl.lemmatize(t) for t in nltk.word_tokenize(doc)]
-
-    return lemma_tokens
-
-class LemmaTokenizer(object):
-
-    def __init__(self):
-        self.wnl = nltk.stem.WordNetLemmatizer()
+    #def __init__(self):
+        #self.wnl = nltk.stem.WordNetLemmatizer()
     
-    def __call__(self, doc):
-        return [self.wnl.lemmatize(t) for t in nltk.word_tokenize(doc)]
+    #def __call__(self, doc):
+        #return [self.wnl.lemmatize(t) for t in nltk.word_tokenize(doc)]
 
 
 class TextPreprocessor(BaseEstimator, TransformerMixin):
@@ -130,6 +123,7 @@ if __name__ == '__main__':
 
     input_files = [ os.path.join(args.train, file) for file in os.listdir(args.train) 
                     if file.endswith('.csv')]
+    
     if len(input_files) == 0:
         raise ValueError(('There is no file in {}.\n' +
                           'This usually indicates that the channel ({}) was incorrectly specified,\n' +
@@ -140,6 +134,7 @@ if __name__ == '__main__':
                           'This usually indicates that the channel ({}) was incorrectly specified,\n' +
                           'the data specification in S3 was incorrectly specified or the role specified\n' +
                           'does not have permission to access the data.').format(args.train, "train"))
+    
     input_file = input_files[0]
     
     df = pd.read_csv(input_file, 
@@ -149,21 +144,20 @@ if __name__ == '__main__':
     
     text_transformer = Pipeline(steps=[
         ('cleaner', TextPreprocessor()),
-        ('vectorizer', TfidfVectorizer(tokenizer=LemmaTokenizer(),
+        ('vectorizer', TfidfVectorizer(analyzer=str.split,
                                        ngram_range=(1,2),
                                        sublinear_tf=True)),
         ('select', TruncatedSVD(n_components=100, n_iter=5))])
 
     preprocessor = ColumnTransformer(transformers=[('txt', text_transformer, ['text'])])
     
-    print(nltk.data.path)
     print("Fitting preprocessor...")
     preprocessor.fit(df)
     print("Done fitting preprocessor!")
     
+    print("Saving model...")
     joblib.dump(preprocessor, os.path.join(args.model_dir, "model.joblib"))
-
-    print("Saved model!")
+    print("Done saving the model!")
     
     
 def input_fn(input_data, content_type):
