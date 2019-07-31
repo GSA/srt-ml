@@ -149,7 +149,7 @@ if __name__ == '__main__':
     
     text_transformer = Pipeline(steps=[
         ('cleaner', TextPreprocessor()),
-        ('vectorizer', TfidfVectorizer(analyzer=str.split,
+        ('vectorizer', TfidfVectorizer(tokenizer=LemmaTokenizer(),
                                        ngram_range=(1,2),
                                        sublinear_tf=True)),
         ('select', TruncatedSVD(n_components=100, n_iter=5))])
