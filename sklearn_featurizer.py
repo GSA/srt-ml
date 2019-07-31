@@ -137,18 +137,21 @@ if __name__ == '__main__':
                      dtype={'target': np.float64, 'text': str})               
 
     # We will train our classifier w/ just one feature: The documment text
-    text_transformer = Pipeline(steps=[
-        ('preprocessor', TextPreprocessor()), 
-        ('vectorizer', TfidfVectorizer(tokenizer=LemmaTokenizer(),
-                                       ngram_range=(1,2),
-                                       sublinear_tf=True)),
+    #text_transformer = Pipeline(steps=[
+        #('preprocessor', TextPreprocessor()), 
+        #('vectorizer', TfidfVectorizer(tokenizer=LemmaTokenizer(),
+                                       #ngram_range=(1,2),
+                                       #sublinear_tf=True)),
         # TODO: consider SelectKBest w/ chi2 for univariate feature selection 
-        ('select', TruncatedSVD(n_components=100, n_iter=5))])
+        #('select', TruncatedSVD(n_components=100, n_iter=5))])
 
-    preprocessor = ColumnTransformer(
-        transformers=[
-            ('txt', text_transformer, ['text'])])
+    #preprocessor = ColumnTransformer(
+        #transformers=[
+            #('txt', text_transformer, ['text'])])
     
+    text_transformer = Pipeline(steps=[('vectorizer', TfidfVectorizer())])
+
+    preprocessor = ColumnTransformer(transformers=[('txt', text_transformer, ['text'])])
     
     print("Fitting preprocessor...")
     preprocessor.fit(df)
