@@ -148,6 +148,15 @@ if __name__ == '__main__':
     preprocessor = ColumnTransformer(transformers=[('txt', 
                                                     text_transformer, 
                                                     ['text'])])
+    
+    #testing to see if the preprocessor error occurs with nltk
+    print("Instantiating WordNetLemmatizer")
+    wnl = nltk.stem.WordNetLemmatizer()
+    doc = "This is a test of nltk's downloads. Can we find them?!"
+    print("Lemmatizing and tokenizing")
+    lemmas = [wnl.lemmatize(t) for t in nltk.word_tokenize(doc)]
+    print("Done lemmatizing and tokenizing!")
+    
     print("Fitting preprocessor...")
     preprocessor.fit(df)
     print("Done fitting preprocessor!")
