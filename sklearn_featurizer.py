@@ -21,12 +21,6 @@ except ImportError:
 
 import numpy as np
 import pandas as pd
-
-#use sklearn version 0.21.3
-import sklearn
-if sklearn.__version__ != '0.21.3':
-    sb.call([sys.executable, "-m", "pip", "install", "scikit-learn==0.21.3"])
-
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import TruncatedSVD
@@ -113,8 +107,6 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
 
 
 if __name__ == '__main__':
-    import sklearn
-    print("sklearn version:  {}".format(sklearn.__version__))
 
     parser = argparse.ArgumentParser()
 
