@@ -145,9 +145,9 @@ if __name__ == '__main__':
     text_transformer = Pipeline(steps=[
         ('cleaner', TextPreprocessor()),
         ('vectorizer', TfidfVectorizer(analyzer=str.split,
-                                       ngram_range=(1,2),
+                                       ngram_range=(1),
                                        sublinear_tf=True)),
-        ('select', TruncatedSVD(n_components=100, n_iter=5))])
+        ('select', TruncatedSVD(n_components=100, n_iter=2))])
 
     preprocessor = ColumnTransformer(transformers=[('txt', text_transformer, ['text'])])
     
