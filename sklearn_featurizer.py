@@ -105,11 +105,10 @@ if __name__ == '__main__':
             
             return processed_text
     
-    
-    def transform(self, X, y = None):
-        X = X['text'].apply(self._preprocessing)
-        
-        return X
+        def transform(self, X, y = None):
+            X = X['text'].apply(self._preprocessing)
+            
+            return X
 
     parser = argparse.ArgumentParser()
 
