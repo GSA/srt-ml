@@ -169,7 +169,20 @@ def input_fn(input_data, content_type):
     """
     if content_type == 'text/csv':
         # Read the raw input data as CSV.
-        df = pd.read_csv(StringIO(input_data))     
+        df = pd.read_csv(StringIO(input_data))
+
+        if len(df.columns) == 2:
+            # This is a labelled example
+            df.columns = ['target', 'text']
+        elif len(df.columns) == 1:
+            # This is an unlabelled example.
+            df.columns = ['text']
+        else:
+            n_cols = len(df.columns)
+            df_head = df.head(2)
+            msg = "Input csv has too many columns of {}:  {}".format(n_cols, df_head)
+            raise ValueError(msg)
+
         return df
     else:
         raise ValueError("{} not supported by script!".format(content_type))
