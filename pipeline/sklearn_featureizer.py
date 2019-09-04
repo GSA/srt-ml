@@ -133,11 +133,16 @@ def predict_fn(input_data, model):
     
     We implement this because the default predict_fn uses .predict(), but our model is a preprocessor
     so we want to use .transform().
-
-    The output is returned in the following order:
-    
-        rest of features either one hot encoded or standardized
     """
+    print("*"*80)
+    print(input_data)
+    print(type(input_data))
+    print(input_data.shape)
+    print("*"*80)
+    #Reshape the data if it has a single feature/column or no shape
+    if input_data.shape[0] == 0 or not input_data.shape:
+        input_data = input_data.reshape(-1,1)
+    
     features = model.transform(input_data)
     
     if 'target' in input_data:
