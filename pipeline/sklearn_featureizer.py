@@ -56,10 +56,9 @@ if __name__ == '__main__':
     
     input_file = input_files[0]
     
-    df = pd.read_csv(input_file, 
-                     header=None,
-                     names=['target', 'text'],
-                     dtype={'target': np.float64, 'text': str})               
+    df = pd.read_csv(input_file)
+    df.columns = ['target', 'text']
+    df = df.astype({'target': np.float64, 'text': str})             
     
     text_transformer = Pipeline(steps=[
         ('preprocessor', TextPreprocessor()),
@@ -89,20 +88,18 @@ def input_fn(input_data, content_type):
     if content_type == 'text/csv':
         # Read the raw input data as CSV.
         df = pd.read_csv(StringIO(input_data))
-
+        
         if len(df.columns) == 2:
-            # This is a labelled example
+            # This is a labelled example, which includes the target
             df.columns = ['target', 'text']
+            df = df.astype({'target': np.float64, 'text': str})
         elif len(df.columns) == 1:
             # This is an unlabelled example.
             df.columns = ['text']
-        else:
-            n_cols = len(df.columns)
-            df_head = df.head(2)
-            msg = "Input csv has too many columns of {}:  {}".format(n_cols, df_head)
-            raise ValueError(msg)
-
+            df = df.astype({'text': str})
+        
         return df
+    
     else:
         raise ValueError("{} not supported by script!".format(content_type))
         
@@ -129,20 +126,12 @@ def output_fn(prediction, accept):
 
 
 def predict_fn(input_data, model):
-    """Preprocess input data
+    """Preprocess input data, which is a pandas dataframe
     
-    We implement this because the default predict_fn uses .predict(), but our model is a preprocessor
-    so we want to use .transform().
+    We implement this because the default predict_fn uses .predict(), but our model is a 
+    preprocessor so we want to use .transform().
     """
-    print("*"*80)
-    print(input_data)
-    print(type(input_data))
-    print(input_data.shape)
-    print("*"*80)
-    #Reshape the data if it has a single feature/column or no shape
-    if input_data.shape[0] == 0 or not input_data.shape:
-        input_data = input_data.reshape(-1,1)
-    
+
     features = model.transform(input_data)
     
     if 'target' in input_data:
