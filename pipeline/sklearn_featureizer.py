@@ -87,7 +87,7 @@ def input_fn(input_data, content_type):
     """
     if content_type == 'text/csv':
         # Read the raw input data as CSV.
-        df = pd.read_csv(StringIO(input_data))
+        df = pd.read_csv(StringIO(input_data), header = None)
         
         if len(df.columns) == 3:
             # This is a labelled example, which includes the target
@@ -97,7 +97,11 @@ def input_fn(input_data, content_type):
             # This is an unlabelled example.
             df.columns = ['text', 'zero']
             df = df.astype({'text': str, 'zero': np.float64})
-        
+
+        else:
+            raise ValueError("Invalid payload. Payload must contain either three columns \
+                (target, text, zero) or two columns (text, zero)")
+
         return df
     
     else:
