@@ -57,8 +57,8 @@ if __name__ == '__main__':
     input_file = input_files[0]
     
     df = pd.read_csv(input_file)
-    df.columns = ['target', 'text']
-    df = df.astype({'target': np.float64, 'text': str})             
+    df.columns = ['target', 'text', 'zero']
+    df = df.astype({'target': np.float64, 'text': str, 'zero': np.float64})             
     
     text_transformer = Pipeline(steps=[
         ('preprocessor', TextPreprocessor()),
@@ -89,14 +89,14 @@ def input_fn(input_data, content_type):
         # Read the raw input data as CSV.
         df = pd.read_csv(StringIO(input_data))
         
-        if len(df.columns) == 2:
+        if len(df.columns) == 3:
             # This is a labelled example, which includes the target
-            df.columns = ['target', 'text']
-            df = df.astype({'target': np.float64, 'text': str})
-        elif len(df.columns) == 1:
+            df.columns = ['target', 'text', 'zero']
+            df = df.astype({'target': np.float64, 'text': str, 'zero': np.float64})
+        elif len(df.columns) == 2:
             # This is an unlabelled example.
-            df.columns = ['text']
-            df = df.astype({'text': str})
+            df.columns = ['text', 'zero']
+            df = df.astype({'text': str, 'zero': np.float64})
         
         return df
     
@@ -146,4 +146,5 @@ def model_fn(model_dir):
     """Deserialize fitted model
     """
     preprocessor = joblib.load(os.path.join(model_dir, "model.joblib"))
+    
     return preprocessor
