@@ -1,59 +1,46 @@
 # sagemaker-pilot
-Pilot of AWS SageMaker.
+This project pilots AWS SageMaker at GSA. Instead of using one of the trivial examples notebooks provided by Amazon, we create a pipeline transfomer connected to a binary classifier for a text classification challenge. That inference pipeline is then deployed to an endpoint where inferences on new samples can be made via REST API calls.
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
-
 ### Prerequisites
 
-What things you need to install the software and how to install them
+#### Virtual Environemnt
 
-```
-Give examples
-```
+We use [pipenv](https://github.com/pypa/pipenv) for dependency management. In the root of this repo, install your dependencies with:
 
-### Installing
-
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
-
-```
-Give the example
+```bash
+pipenv install
 ```
 
-And repeat
+Now start a shell with that environment:
 
-```
-until finished
-```
-
-End with an example of getting some data out of the system or using it for a little demo
-
-## Running the tests
-
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
-```
-Give an example
+```bash
+pipenv shell
 ```
 
-### And coding style tests
+This will spawn a new shell subprocess, which can be deactivated by using `exit`.
 
-Explain what these tests test and why
+One of the required packages you just installed is `ipykernel`. We use this to create a kernel that uses our virtual enivronment for the Jupyter Notebook:
 
+```bash
+ipython kernel install --user --name=tokenization
 ```
-Give an example
-```
 
-## Deployment
+#### Get the labeled training data
 
-Add additional notes about how to deploy this on a live system
+You can find the pre-labeled documents [here](https://drive.google.com/drive/folders/1jSlRzeZuKj4RRUrgrjXoVcQXsrMtZfB4). Download them and move them into a new directory named `labeled_fbo_docs`.
+
+
+#### Configure the AWS CLI
+
+The `awscli` python package was included as a dependency, but you still need to configure it using `aws configure`. See this [doc](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html#cli-quick-configuration) on how to do that. NOTE: You should have already created an IAM user for this project - as well as the infrastructure - following the steps [here](https://docs.google.com/document/d/1R8JgXL1Pgz67-0d8J_NXQ3TSOZErIJaREr3LqVC5rdI/edit#).
+
+### Open the Notebook
+
+At this point, you can start jupyter with `jupyter notebook`. Open `Tokenization.ipynb` and select the kernel that you created a moment ago. 
+
+From here, follow the steps in the notebook to push these files to your S3 bucket. Make sure you adust the name of the bucket to reflect your bucket's name.
 
 ## Contributing
 
@@ -61,8 +48,4 @@ Please read [CONTRIBUTING.md](https://github.com/GSA/sagemaker-pilot/blob/master
 
 ## License
 
-This project is licensed under the Creative Commons Zero v1.0 Universal License - see the [LICENSE.md](https://github.com/GSA/sagemaker-pilot/blob/master/.github/LICENSE) file for details
-
-## Acknowledgments
-
-Acknowledge folks here.
+This project is licensed under the Creative Commons Zero v1.0 Universal License - see the [LICENSE.md](https://github.com/GSA/sagemaker-pilot/blob/master/.github/LICENSE) file for details.
