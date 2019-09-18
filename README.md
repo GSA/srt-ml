@@ -38,9 +38,13 @@ The `awscli` python package was included as a dependency, but you still need to 
 
 ### Open the Notebook
 
-At this point, you can start jupyter with `jupyter notebook`. Open `Tokenization.ipynb` and select the kernel that you created a moment ago. 
+At this point, you can start jupyter with `jupyter notebook`. Open `Upload Training Data to S3.ipynb` and select the kernel that you created a moment ago. 
 
 From here, follow the steps in the notebook to push these files to your S3 bucket. Make sure you adust the name of the bucket to reflect your bucket's name.
+
+### Use SageMaker
+
+You're now ready to use SageMaker. Refer back to this [doc](https://docs.google.com/document/d/1R8JgXL1Pgz67-0d8J_NXQ3TSOZErIJaREr3LqVC5rdI/edit#heading=h.acltlxb0riwy) to pick up where you left off.
 
 ## Contributing
 
