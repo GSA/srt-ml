@@ -1,6 +1,9 @@
 ---
 name: User Story
 about: Describe what you need and why.
+title: ''
+labels: ''
+assignees: ''
 
 ---
 
