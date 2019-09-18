@@ -57,8 +57,8 @@ if __name__ == '__main__':
     input_file = input_files[0]
     
     df = pd.read_csv(input_file)
-    df.columns = ['target', 'text', 'zero']
-    df = df.astype({'target': np.float64, 'text': str, 'zero': np.float64})             
+    df.columns = ['target', 'text']
+    df = df.astype({'target': np.float64, 'text': str})             
     
     text_transformer = Pipeline(steps=[
         ('preprocessor', TextPreprocessor()),
@@ -89,18 +89,17 @@ def input_fn(input_data, content_type):
         # Read the raw input data as CSV.
         df = pd.read_csv(StringIO(input_data), header = None)
         
-        if len(df.columns) == 3:
+        if len(df.columns) == 2:
             # This is a labelled example, which includes the target
-            df.columns = ['target', 'text', 'zero']
-            df = df.astype({'target': np.float64, 'text': str, 'zero': np.float64})
-        elif len(df.columns) == 2:
+            df.columns = ['target', 'text']
+            df = df.astype({'target': np.float64, 'text': str})
+        elif len(df.columns) == 1:
             # This is an unlabelled example.
-            df.columns = ['text', 'zero']
-            df = df.astype({'text': str, 'zero': np.float64})
-
+            df.columns = ['text']
+            df = df.astype({'text': str})
         else:
-            raise ValueError("Invalid payload. Payload must contain either three columns \
-                (target, text, zero) or two columns (text, zero)")
+            raise ValueError("Invalid payload. Payload must contain either two columns \
+                (target, text) or one column (text)")
 
         return df
     
