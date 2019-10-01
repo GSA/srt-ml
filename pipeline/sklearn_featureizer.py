@@ -130,10 +130,10 @@ def output_fn(prediction, accept):
 
 
 def predict_fn(input_data, model):
-    """Process input data, which is a pandas dataframe, and make predictions
+    """Call predict on the estimator given input data.
     """
 
-    y_preds = model.fit_predict(input_data)
+    y_preds = model.predict(input_data)
     
     if 'target' in input_data:
         # Return the label (as the first column) alongside the predictions
