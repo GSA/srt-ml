@@ -26,7 +26,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_selection import SelectKBest, chi2
 from sklearn.linear_model import SGDClassifier
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import FunctionTransformer
 
 from featurizers import TextPreprocessor
 
@@ -66,7 +65,6 @@ if __name__ == '__main__':
         return X['text']
 
     model = Pipeline(steps=[
-        ('selector', FunctionTransformer(select_text_column)),
         ('preprocessor', TextPreprocessor()),
         ('vectorizer', TfidfVectorizer(analyzer = str.split,
                                        ngram_range = (1,2),
