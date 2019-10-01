@@ -26,6 +26,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_selection import SelectKBest, chi2
 from sklearn.linear_model import SGDClassifier
 from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import FunctionTransformer
 
 from featurizers import TextPreprocessor
 
@@ -61,7 +62,11 @@ if __name__ == '__main__':
     df.columns = ['target', 'text']
     df = df.astype({'target': np.float64, 'text': str})             
     
-    text_transformer = Pipeline(steps=[
+    def select_text_column(X):
+        return X['text']
+
+    model = Pipeline(steps=[
+        ('selector', FunctionTransformer(select_text_column)),
         ('preprocessor', TextPreprocessor()),
         ('vectorizer', TfidfVectorizer(analyzer = str.split,
                                        ngram_range = (1,2),
@@ -134,7 +139,7 @@ def predict_fn(input_data, model):
     """Process input data, which is a pandas dataframe, and make predictions
     """
 
-    y_preds = model.transform(input_data)
+    y_preds = model.fit_predict(input_data)
     
     if 'target' in input_data:
         # Return the label (as the first column) alongside the predictions
@@ -150,3 +155,4 @@ def model_fn(model_dir):
     model = joblib.load(os.path.join(model_dir, "model.joblib"))
     
     return model
+
