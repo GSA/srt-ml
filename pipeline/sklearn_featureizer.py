@@ -60,9 +60,6 @@ if __name__ == '__main__':
     df = pd.read_csv(input_file)
     df.columns = ['target', 'text']
     df = df.astype({'target': np.float64, 'text': str})             
-    
-    def select_text_column(X):
-        return X['text']
 
     model = Pipeline(steps=[
         ('preprocessor', TextPreprocessor()),
@@ -73,7 +70,8 @@ if __name__ == '__main__':
         ('estimator', SGDClassifier())])
     
     print("Fitting model...")
-    model.fit(df)
+    y = df['target']
+    model.fit(df, y)
     print("Done fitting model!")
     
     print("Saving model...")
