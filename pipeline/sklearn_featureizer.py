@@ -24,6 +24,7 @@ from sklearn.decomposition import TruncatedSVD
 from sklearn.externals import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_selection import SelectKBest, chi2
+from sklearn.linear_model import SGDClassifier
 from sklearn.pipeline import Pipeline
 
 from featurizers import TextPreprocessor
@@ -62,19 +63,20 @@ if __name__ == '__main__':
     
     text_transformer = Pipeline(steps=[
         ('preprocessor', TextPreprocessor()),
-        ('vectorizer', TfidfVectorizer(analyzer=str.split,
-                                       ngram_range=(1,2),
-                                       sublinear_tf=True)),
-        ('select', TruncatedSVD(n_components=100, n_iter=2))])
+        ('vectorizer', TfidfVectorizer(analyzer = str.split,
+                                       ngram_range = (1,2),
+                                       sublinear_tf = True)),
+        ('select', TruncatedSVD(n_components = 100, n_iter = 2)),
+        ('estimator', SGDClassifier())])
 
-    preprocessor = ColumnTransformer(transformers=[('txt', text_transformer, ['text'])])
+    model = ColumnTransformer(transformers = [('txt', text_transformer, ['text'])])
     
-    print("Fitting preprocessor...")
-    preprocessor.fit(df)
-    print("Done fitting preprocessor!")
+    print("Fitting model...")
+    model.fit(df)
+    print("Done fitting model!")
     
     print("Saving model...")
-    joblib.dump(preprocessor, os.path.join(args.model_dir, "model.joblib"))
+    joblib.dump(model, os.path.join(args.model_dir, "model.joblib"))
     print("Done saving the model!")
     
     
@@ -129,25 +131,22 @@ def output_fn(prediction, accept):
 
 
 def predict_fn(input_data, model):
-    """Preprocess input data, which is a pandas dataframe
-    
-    We implement this because the default predict_fn uses .predict(), but our model is a 
-    preprocessor so we want to use .transform().
+    """Process input data, which is a pandas dataframe, and make predictions
     """
 
-    features = model.transform(input_data)
+    y_preds = model.transform(input_data)
     
     if 'target' in input_data:
-        # Return the label (as the first column) and the set of features.
-        return np.insert(features, 0, input_data['target'], axis=1)
+        # Return the label (as the first column) alongside the predictions
+        return np.insert(y_preds, 0, input_data['target'], axis=1)
     else:
-        # Return only the set of features
-        return features
+        # Return only the predictions
+        return y_preds
     
 
 def model_fn(model_dir):
     """Deserialize fitted model
     """
-    preprocessor = joblib.load(os.path.join(model_dir, "model.joblib"))
+    model = joblib.load(os.path.join(model_dir, "model.joblib"))
     
-    return preprocessor
+    return model
