@@ -13,6 +13,7 @@ ipykernel = "*"
 awscli = "*"
 pandas = "*"
 scikit-learn = "==0.20.0"
+sagemaker-containers = "*"
 
 [requires]
 python_version = "3.7"
