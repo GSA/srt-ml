@@ -73,8 +73,6 @@ if __name__ == '__main__':
                                        sublinear_tf = True)),
         ('select', TruncatedSVD(n_components = 100, n_iter = 2)),
         ('estimator', SGDClassifier())])
-
-    model = ColumnTransformer(transformers = [('txt', text_transformer, ['text'])])
     
     print("Fitting model...")
     model.fit(df)
