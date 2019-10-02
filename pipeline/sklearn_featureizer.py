@@ -108,8 +108,8 @@ def input_fn(input_data, content_type):
         raise ValueError("{} not supported by script!".format(content_type))
         
 
-def output_fn(prediction, accept):
-    """Format prediction output
+def output_fn(inferences, accept):
+    """Format inferences output
     
     The default accept/content-type between containers for serial inference is JSON.
     We also want to set the ContentType or mimetype as the same value as accept so the next
@@ -117,12 +117,17 @@ def output_fn(prediction, accept):
     """
     if accept == "application/json":
         instances = []
-        for decision_boundary, prediction in prediction.tolist():
-            instances.append({"decision bondary": decision_boundary,
-                              "prediction": prediction})
-
+        for inference in inferences.tolist():
+            try:
+                target, decision_boundary, prediction = inference
+                instances.append({"decision bondary": decision_boundary,
+                                  "prediction": prediction,
+                                  "target": target})
+            except ValueError:
+                decision_boundary, prediction = inference
+                instances.append({"decision bondary": decision_boundary,
+                                  "prediction": prediction})
         json_output = {"instances": instances}
-
         return worker.Response(json.dumps(json_output), mimetype=accept)
     elif accept == 'text/csv':
         return worker.Response(encoders.encode(prediction, accept), mimetype=accept)
@@ -141,13 +146,8 @@ def predict_fn(input_data, model):
         y_scores = model.predict_proba(input_data)[:,positive_class_idx]
     except AttributeError:
         y_scores = model.decision_function(input_data)
-    
-    #insert decision boundaries
-    try:
-        inferences = np.insert(y_preds, 0, y_scores, axis = 1)
-    except:
-        return y_preds, y_scores
-
+    inferences = np.column_stack((y_scores, y_preds))
+        
     if 'target' in input_data:
         # Return the label (as the first column) alongside the inferences
         return np.insert(inferences, 0, input_data['target'], axis = 1)
