@@ -143,7 +143,10 @@ def predict_fn(input_data, model):
         y_scores = model.decision_function(input_data)
     
     #insert decision boundaries
-    inferences = np.insert(y_preds, 0, y_scores, axis = 1)
+    try:
+        inferences = np.insert(y_preds, 0, y_scores, axis = 1)
+    except:
+        return y_preds, y_scores
 
     if 'target' in input_data:
         # Return the label (as the first column) alongside the inferences
