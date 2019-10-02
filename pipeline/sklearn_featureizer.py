@@ -108,18 +108,48 @@ def input_fn(input_data, content_type):
         raise ValueError("{} not supported by script!".format(content_type))
         
 
+def output_fn(prediction, accept):
+    """Format prediction output
+    
+    The default accept/content-type between containers for serial inference is JSON.
+    We also want to set the ContentType or mimetype as the same value as accept so the next
+    container can read the response payload correctly.
+    """
+    if accept == "application/json":
+        instances = []
+        for decision_boundary, prediction in prediction.tolist():
+            instances.append({"decision bondary": decision_boundary,
+                              "prediction": prediction})
+
+        json_output = {"instances": instances}
+
+        return worker.Response(json.dumps(json_output), mimetype=accept)
+    elif accept == 'text/csv':
+        return worker.Response(encoders.encode(prediction, accept), mimetype=accept)
+    else:
+        raise RuntimeError("{} accept type is not supported by this script.".format(accept))
+
+
 def predict_fn(input_data, model):
     """Call predict on the estimator given input data.
     """
 
     y_preds = model.predict(input_data)
+    #get the index of the positive class (i.e. 1, compliant)
+    positive_class_idx = list(model.classes_).index(1)
+    try:
+        y_scores = model.predict_proba(input_data)[:,positive_class_idx]
+    except AttributeError:
+        y_scores = model.decision_function(input_data)
     
+    #insert decision boundaries
+    inferences = np.insert(y_preds, 0, y_scores, axis = 1)
+
     if 'target' in input_data:
-        # Return the label (as the first column) alongside the predictions
-        return np.insert(y_preds, 0, input_data['target'], axis=1)
+        # Return the label (as the first column) alongside the inferences
+        return np.insert(inferences, 0, input_data['target'], axis = 1)
     else:
-        # Return only the predictions
-        return y_preds
+        return inferences
     
 
 def model_fn(model_dir):
