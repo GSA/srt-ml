@@ -120,12 +120,12 @@ def output_fn(inferences, accept):
         for inference in inferences.tolist():
             try:
                 target, decision_boundary, prediction = inference
-                instances.append({"decision bondary": decision_boundary,
+                instances.append({"decision boundary": decision_boundary,
                                   "prediction": prediction,
                                   "target": target})
             except ValueError:
                 decision_boundary, prediction = inference
-                instances.append({"decision bondary": decision_boundary,
+                instances.append({"decision boundary": decision_boundary,
                                   "prediction": prediction})
         json_output = {"instances": instances}
         return worker.Response(json.dumps(json_output), mimetype=accept)
