@@ -28,6 +28,7 @@ from sklearn.linear_model import SGDClassifier
 from sklearn.pipeline import Pipeline
 
 from featurizers import TextPreprocessor
+from train import randomized_grid_search
 
 
 if __name__ == '__main__':
@@ -61,17 +62,15 @@ if __name__ == '__main__':
     df.columns = ['target', 'text']
     df = df.astype({'target': np.float64, 'text': str})             
 
-    model = Pipeline(steps=[
-        ('preprocessor', TextPreprocessor()),
-        ('vectorizer', TfidfVectorizer(analyzer = str.split,
-                                       ngram_range = (1,2),
-                                       sublinear_tf = True)),
-        ('select', TruncatedSVD(n_components = 100, n_iter = 2)),
-        ('estimator', SGDClassifier())])
+    pipeline= Pipeline(steps=[
+               ('preprocessor', TextPreprocessor()),
+               ('vectorizer', TfidfVectorizer(analyzer = str.split,
+                                              ngram_range = (1,2))),
+               ('select', TruncatedSVD()),
+               ('estimator', SGDClassifier(class_weight = "balanced"))])
     
     print("Fitting model...")
-    y = df['target']
-    model.fit(df, y)
+    model = randomized_grid_search(df, pipeline, objective_metric_name='roc_auc', n_iter_search=10)
     print("Done fitting model!")
     
     print("Saving model...")
