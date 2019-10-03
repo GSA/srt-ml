@@ -94,6 +94,6 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
                 
     
         def transform(self, X, y = None):
-            X = X['text'].apply(self._preprocessing)
+            X = X.apply(self._preprocessing)
             
             return X
