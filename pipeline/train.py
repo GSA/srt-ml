@@ -25,7 +25,7 @@ class log_uniform():
         return np.power(self.base, uniform.rvs(size=size, random_state=random_state))
 
 
-def randomized_grid_search(df, pipeline, objective_metric_name='roc_auc', n_iter_search=10):
+def randomized_grid_search(df, pipeline, objective_metric_name='roc_auc', n_iter_search=5):
     """
     Performs a randomized grid search `n_iter_search` times using the pipeline provided and 
     the `objective_metric_name` as a scoring metric during refittig.
@@ -54,10 +54,11 @@ def randomized_grid_search(df, pipeline, objective_metric_name='roc_auc', n_iter
                        "vectorizer__min_df": stats.randint(1,3),
                        "vectorizer__max_df": stats.uniform(.95,.3),
                        "vectorizer__sublinear_tf": [True, False],
-                       "select__n_components": [10,100,200,500,1000,1500,2000,5000],
-                       "select__n_iter": stats.randint(5,1000),
+                       "select__n_components": stats.randint(10,50),
+                       "select__n_iter": stats.randint(5,10),
                        "estimator__alpha": log_uniform(-5,2),
                        "estimator__penalty": ['l2','l1','elasticnet'],
+                       "estimator__max_iter": stats.randint(5,10),
                        "estimator__loss": ['hinge', 'log', 'modified_huber', 'squared_hinge', 'perceptron'],
                        }
     

@@ -70,7 +70,7 @@ if __name__ == '__main__':
                ('estimator', SGDClassifier(class_weight = "balanced"))])
     
     print("Fitting model...")
-    model = randomized_grid_search(df, pipeline, objective_metric_name='roc_auc', n_iter_search=10)
+    model = randomized_grid_search(df, pipeline, objective_metric_name='accuracy', n_iter_search=5)
     print("Done fitting model!")
     
     print("Saving model...")
