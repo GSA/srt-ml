@@ -94,14 +94,6 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
                 
     
         def transform(self, X, y = None):
-            n_cols = len(X.columns)
-            if n_cols == 1:
-                X = X.apply(self._preprocessing)
-            else:
-                if 'text' in X.columns:
-                    X = X['text'].apply(self._preprocessing)
-                else:
-                    raise ValueError(f"Invalid data format. Dataframe must contain a column named 'text'. \
-                        Found {X.columns}")
+            X = X.apply(self._preprocessing)
             
             return X

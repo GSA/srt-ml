@@ -137,8 +137,10 @@ def output_fn(inferences, accept):
 def predict_fn(input_data, model):
     """Call predict on the estimator given input data.
     """
-
+    input_data = input_data['text']
+    
     y_preds = model.predict(input_data)
+    
     #get the index of the positive class (i.e. 1, compliant)
     positive_class_idx = list(model.classes_).index(1)
     try:
