@@ -24,9 +24,11 @@ from sklearn.decomposition import TruncatedSVD
 from sklearn.externals import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_selection import SelectKBest, chi2
+from sklearn.linear_model import SGDClassifier
 from sklearn.pipeline import Pipeline
 
 from featurizers import TextPreprocessor
+from train import randomized_grid_search
 
 
 if __name__ == '__main__':
@@ -59,22 +61,20 @@ if __name__ == '__main__':
     df = pd.read_csv(input_file)
     df.columns = ['target', 'text']
     df = df.astype({'target': np.float64, 'text': str})             
-    
-    text_transformer = Pipeline(steps=[
-        ('preprocessor', TextPreprocessor()),
-        ('vectorizer', TfidfVectorizer(analyzer=str.split,
-                                       ngram_range=(1,2),
-                                       sublinear_tf=True)),
-        ('select', TruncatedSVD(n_components=100, n_iter=2))])
 
-    preprocessor = ColumnTransformer(transformers=[('txt', text_transformer, ['text'])])
+    pipeline= Pipeline(steps=[
+               ('preprocessor', TextPreprocessor()),
+               ('vectorizer', TfidfVectorizer(analyzer = str.split,
+                                              ngram_range = (1,2))),
+               ('select', TruncatedSVD()),
+               ('estimator', SGDClassifier(class_weight = "balanced"))])
     
-    print("Fitting preprocessor...")
-    preprocessor.fit(df)
-    print("Done fitting preprocessor!")
+    print("Fitting model...")
+    model = randomized_grid_search(df, pipeline, objective_metric_name='accuracy', n_iter_search=1)
+    print("Done fitting model!")
     
     print("Saving model...")
-    joblib.dump(preprocessor, os.path.join(args.model_dir, "model.joblib"))
+    joblib.dump(model, os.path.join(args.model_dir, "model.joblib"))
     print("Done saving the model!")
     
     
@@ -107,8 +107,8 @@ def input_fn(input_data, content_type):
         raise ValueError("{} not supported by script!".format(content_type))
         
 
-def output_fn(prediction, accept):
-    """Format prediction output
+def output_fn(inferences, accept):
+    """Format inferences output
     
     The default accept/content-type between containers for serial inference is JSON.
     We also want to set the ContentType or mimetype as the same value as accept so the next
@@ -116,11 +116,17 @@ def output_fn(prediction, accept):
     """
     if accept == "application/json":
         instances = []
-        for row in prediction.tolist():
-            instances.append({"features": row})
-
+        for inference in inferences.tolist():
+            try:
+                target, decision_boundary, prediction = inference
+                instances.append({"decision boundary": decision_boundary,
+                                  "prediction": prediction,
+                                  "target": target})
+            except ValueError:
+                decision_boundary, prediction = inference
+                instances.append({"decision boundary": decision_boundary,
+                                  "prediction": prediction})
         json_output = {"instances": instances}
-
         return worker.Response(json.dumps(json_output), mimetype=accept)
     elif accept == 'text/csv':
         return worker.Response(encoders.encode(prediction, accept), mimetype=accept)
@@ -129,25 +135,31 @@ def output_fn(prediction, accept):
 
 
 def predict_fn(input_data, model):
-    """Preprocess input data, which is a pandas dataframe
-    
-    We implement this because the default predict_fn uses .predict(), but our model is a 
-    preprocessor so we want to use .transform().
+    """Call predict on the estimator given input data.
     """
-
-    features = model.transform(input_data)
+    input_data = input_data['text']
     
+    y_preds = model.predict(input_data)
+    
+    #get the index of the positive class (i.e. 1, compliant)
+    positive_class_idx = list(model.classes_).index(1)
+    try:
+        y_scores = model.predict_proba(input_data)[:,positive_class_idx]
+    except AttributeError:
+        y_scores = model.decision_function(input_data)
+    inferences = np.column_stack((y_scores, y_preds))
+        
     if 'target' in input_data:
-        # Return the label (as the first column) and the set of features.
-        return np.insert(features, 0, input_data['target'], axis=1)
+        # Return the label (as the first column) alongside the inferences
+        return np.insert(inferences, 0, input_data['target'], axis = 1)
     else:
-        # Return only the set of features
-        return features
+        return inferences
     
 
 def model_fn(model_dir):
     """Deserialize fitted model
     """
-    preprocessor = joblib.load(os.path.join(model_dir, "model.joblib"))
+    model = joblib.load(os.path.join(model_dir, "model.joblib"))
     
-    return preprocessor
+    return model
+

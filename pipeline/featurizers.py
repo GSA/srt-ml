@@ -1,39 +1,45 @@
 import re
 import string
+import subprocess as sb
+import sys
 
 from sklearn.base import BaseEstimator, TransformerMixin
 
-#try:
-    #import nltk  
-#except ImportError:
+
+try:
+    import nltk  
+except ImportError:
     # pip install nltk without going the custom dockerfile route
-    #sb.call([sys.executable, "-m", "pip", "install", "nltk"]) 
-    #import nltk
+    sb.call([sys.executable, "-m", "pip", "install", "nltk"]) 
+    import nltk
 
-#try:
-    #nltk.data.find('wordnet')
-#except LookupError:
-    #nltk.download('wordnet')
+try:
+    nltk.data.find('wordnet')
+except LookupError:
+    nltk.download('wordnet')
 
-#try:
-    #nltk.data.find('punkt')
-#except LookupError:
-    #nltk.download('punkt')
+from nltk.corpus import wordnet
 
-#class LemmaTokenizer(object):
+try:
+    nltk.data.find('punkt')
+except LookupError:
+    nltk.download('punkt')
 
-    #def __init__(self):
-        #self.wnl = nltk.stem.WordNetLemmatizer()
-    
-    #def __call__(self, doc):
-        #return [self.wnl.lemmatize(t) for t in nltk.word_tokenize(doc)]
-
+try:
+    nltk.data.find('averaged_perceptron_tagger')
+except LookupError:
+    nltk.download('averaged_perceptron_tagger')
 
 class TextPreprocessor(BaseEstimator, TransformerMixin):
     
         def __init__(self):
-            self.control_regex = re.compile(r'[\s]|[a-z]|\b508\b|\b1973\b')
-            self.token_pattern = re.compile(r'(?u)\b\w\w+\b')
+            self.wnl = nltk.stem.WordNetLemmatizer()
+            self.tag_map = {"J": wordnet.ADJ,
+                            "N": wordnet.NOUN,
+                            "V": wordnet.VERB,
+                            "R": wordnet.ADV}
+            self.control_regex = re.compile(r'[a-z]{2,}?|^508$|^1973$')
+            self.token_pattern = re.compile(r'(?u)^\w\w+?$')
             self.stopwords = {'ourselves', 'hers', 'between', 'yourself', 'but', 'again', 
                               'there', 'about', 'once', 'during', 'out', 'very', 'having', 
                               'with', 'they', 'own', 'an', 'be', 'some', 'for', 'do', 'its',
@@ -55,29 +61,39 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
         def fit(self, X, y = None):
             return self 
         
+        def _keep_token(self, token):
+            is_punc = token in string.punctuation
+            if is_punc:
+                return
+            lowered = token.lower()
+            is_stopword = lowered in self.stopwords
+            if is_stopword:
+                return
+            is_not_match = True if not self.control_regex.search(lowered) else False
+            if is_not_match:
+                return
+            is_not_token_pattern = True if not self.token_pattern.search(lowered) else False
+            if is_not_token_pattern:
+                return
+            
+            return True
 
         def _preprocessing(self, doc):
-            # split at any white space and rejoin using a single space. Then lowercase.
-            doc_lowered = " ".join(doc.split()).lower()
-            # map punctuation to space
-            translator = str.maketrans(string.punctuation, ' '*len(string.punctuation)) 
-            doc_lowered = doc_lowered.translate(translator)
-            tokens = "".join(self.control_regex.findall(doc_lowered)).split()
-            processed_text = []
-            for token in tokens:
-                if token in self.stopwords:
+            pos_tagged_tokens = nltk.pos_tag(nltk.word_tokenize(doc))
+            lemmas = []
+            for token, pos_tag in pos_tagged_tokens:
+                if not self._keep_token(token):
                     continue
-                m = self.token_pattern.search(token)
-                if not m:
+                pos_tag = self.tag_map.get(pos_tag[0])
+                if not pos_tag:
+                    lemmas.append(self.wnl.lemmatize(token).lower())
                     continue
-                word = m.group().strip()
-                processed_text.append(word)
-            
-            processed_text = " ".join(processed_text)
-            
-            return processed_text
+                lemmas.append(self.wnl.lemmatize(token, pos = pos_tag).lower())
+             
+            return " ".join(lemmas)
+                
     
         def transform(self, X, y = None):
-            X = X['text'].apply(self._preprocessing)
+            X = X.apply(self._preprocessing)
             
             return X
