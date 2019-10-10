@@ -1,15 +1,8 @@
-from __future__ import print_function
-
 import argparse
 import csv
 from io import StringIO
 import json
 import os
-import re
-import shutil
-import subprocess as sb 
-import sys
-import time
 
 import numpy as np
 import pandas as pd
@@ -23,7 +16,6 @@ from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import TruncatedSVD
 from sklearn.externals import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_selection import SelectKBest, chi2
 from sklearn.linear_model import SGDClassifier
 from sklearn.pipeline import Pipeline
 
@@ -64,13 +56,17 @@ if __name__ == '__main__':
 
     pipeline= Pipeline(steps=[
                ('preprocessor', TextPreprocessor()),
-               ('vectorizer', TfidfVectorizer(analyzer = str.split,
-                                              ngram_range = (1,2))),
+               ('vectorizer', TfidfVectorizer(analyzer=str.split,
+                                              lowercase=False)), #tokens are already lowercase
                ('select', TruncatedSVD()),
-               ('estimator', SGDClassifier(class_weight = "balanced"))])
+               ('estimator', SGDClassifier(class_weight="balanced"))])
     
     print("Fitting model...")
-    model = randomized_grid_search(df, pipeline, objective_metric_name='accuracy', n_iter_search=1)
+    model = randomized_grid_search(
+        df, 
+        pipeline, 
+        objective_metric_name='fbeta', 
+        n_iter_search=100)
     print("Done fitting model!")
     
     print("Saving model...")
@@ -87,7 +83,7 @@ def input_fn(input_data, content_type):
     """
     if content_type == 'text/csv':
         # Read the raw input data as CSV.
-        df = pd.read_csv(StringIO(input_data), header = None)
+        df = pd.read_csv(StringIO(input_data), header=None)
         
         if len(df.columns) == 2:
             # This is a labelled example, which includes the target
@@ -151,7 +147,7 @@ def predict_fn(input_data, model):
         
     if 'target' in input_data:
         # Return the label (as the first column) alongside the inferences
-        return np.insert(inferences, 0, input_data['target'], axis = 1)
+        return np.insert(inferences, 0, input_data['target'], axis=1)
     else:
         return inferences
     

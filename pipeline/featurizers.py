@@ -58,7 +58,7 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
                               'it', 'how', 'further', 'was', 'here', 'than'}
 
 
-        def fit(self, X, y = None):
+        def fit(self, X, y=None):
             return self 
         
         def _keep_token(self, token):
@@ -88,7 +88,7 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
                 if not pos_tag:
                     lemmas.append(self.wnl.lemmatize(token).lower())
                     continue
-                lemmas.append(self.wnl.lemmatize(token, pos = pos_tag).lower())
+                lemmas.append(self.wnl.lemmatize(token, pos=pos_tag).lower())
              
             return " ".join(lemmas)
                 
