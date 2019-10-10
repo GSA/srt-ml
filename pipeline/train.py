@@ -11,13 +11,15 @@ class log_uniform():
     High is the number of decimals to which the right end of the distrubution will go (e.g.
     high=3 means the max might be 999.2). The resultant log-uniform distribution will be skewed
     right, with the majority of values being < 1.
+
+    Note that the rvs method must have the size and random_state kwargs to be sklearn compatible
     """
     def __init__(self, low=-5, high=3, base=10):
         self.low = low
         self.scale = high
         self.base = base
 
-    def rvs(self,):
+    def rvs(self, size=1, random_state=None):
         return np.power(self.base, np.random.uniform(self.low, self.high))
 
 
