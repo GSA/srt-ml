@@ -3,6 +3,8 @@ import csv
 from io import StringIO
 import json
 import os
+import warnings
+warnings.filterwarnings('once')
 
 import numpy as np
 import pandas as pd

@@ -2,6 +2,8 @@ import re
 import string
 import subprocess as sb
 import sys
+import warnings
+warnings.filterwarnings('once')
 
 from sklearn.base import BaseEstimator, TransformerMixin
 

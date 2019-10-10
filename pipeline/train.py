@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings('once')
+
 import numpy as np
 from scipy import stats
 from sklearn import metrics
