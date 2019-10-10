@@ -16,7 +16,7 @@ class log_uniform():
     """
     def __init__(self, low=-5, high=3, base=10):
         self.low = low
-        self.scale = high
+        self.high = high
         self.base = base
 
     def rvs(self, size=1, random_state=None):
