@@ -66,8 +66,7 @@ if __name__ == '__main__':
     print("Fitting model...")
     model = randomized_grid_search(
         df, 
-        pipeline, 
-        objective_metric_name='fbeta', 
+        pipeline,
         n_iter_search=100)
     print("Done fitting model!")
     
