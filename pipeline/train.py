@@ -63,8 +63,6 @@ def randomized_grid_search(df, pipeline, objective_metric_name='roc_auc', n_iter
                        "estimator__penalty": ['l2','l1','elasticnet'],
                        "estimator__max_iter": stats.randint(10,50),
                        "estimator__learning_rate": ['invscaling', 'constant', 'optimal'],
-                       "estimator__eta0": log_uniform(-3,0),
-                       "estimator__power_t": log_uniform(-4,0),
                        "estimator__loss": ['hinge', 'log', 'modified_huber', 'squared_hinge', 'perceptron']
                        }
     
