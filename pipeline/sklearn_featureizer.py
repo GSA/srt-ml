@@ -9,9 +9,6 @@ import warnings
 warnings.filterwarnings('once')
 
 import numpy as np
-if np.__version__ != '1.17.2':
-    # See https://github.com/numpy/numpy/issues/12785
-    sb.call([sys.executable, "-m", "pip", "install", "numpy==1.17.2"]) 
 import pandas as pd
 from sagemaker_containers.beta.framework import (content_types, 
                                                  encoders, 
