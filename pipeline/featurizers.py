@@ -1,36 +1,12 @@
 import re
 import string
-import subprocess as sb
-import sys
 import warnings
 warnings.filterwarnings('once')
 
+import nltk
+from nltk.corpus import wordnet
 from sklearn.base import BaseEstimator, TransformerMixin
 
-
-try:
-    import nltk  
-except ImportError:
-    # pip install nltk without going the custom dockerfile route
-    sb.call([sys.executable, "-m", "pip", "install", "nltk"]) 
-    import nltk
-
-try:
-    nltk.data.find('wordnet')
-except LookupError:
-    nltk.download('wordnet',quiet=True)
-
-from nltk.corpus import wordnet
-
-try:
-    nltk.data.find('punkt')
-except LookupError:
-    nltk.download('punkt',quiet=True)
-
-try:
-    nltk.data.find('averaged_perceptron_tagger')
-except LookupError:
-    nltk.download('averaged_perceptron_tagger',quiet=True)
 
 class TextPreprocessor(BaseEstimator, TransformerMixin):
     

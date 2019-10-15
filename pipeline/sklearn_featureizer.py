@@ -3,10 +3,15 @@ import csv
 from io import StringIO
 import json
 import os
+import subprocess as sb
+import sys
 import warnings
 warnings.filterwarnings('once')
 
 import numpy as np
+if np.__version__ != '1.17.2':
+    # See https://github.com/numpy/numpy/issues/12785
+    sb.call([sys.executable, "-m", "pip", "install", "numpy==1.17.2"]) 
 import pandas as pd
 from sagemaker_containers.beta.framework import (content_types, 
                                                  encoders, 
@@ -20,6 +25,30 @@ from sklearn.externals import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import SGDClassifier
 from sklearn.pipeline import Pipeline
+
+try:
+    import nltk  
+except ImportError:
+    # pip install nltk without going the custom dockerfile route
+    # Although featurizers.py uses nltk, put the pip installs here so that
+    # the gride searching doesn't constantly make these calls
+    sb.call([sys.executable, "-m", "pip", "install", "nltk"]) 
+    import nltk
+
+try:
+    nltk.data.find('wordnet')
+except LookupError:
+    nltk.download('wordnet',quiet=True)
+
+try:
+    nltk.data.find('punkt')
+except LookupError:
+    nltk.download('punkt',quiet=True)
+
+try:
+    nltk.data.find('averaged_perceptron_tagger')
+except LookupError:
+    nltk.download('averaged_perceptron_tagger',quiet=True)
 
 from featurizers import TextPreprocessor
 from train import randomized_grid_search
@@ -67,7 +96,7 @@ if __name__ == '__main__':
     model = randomized_grid_search(
         df, 
         pipeline,
-        n_iter_search=100)
+        n_iter_search=1)
     print("Done fitting model!")
     
     print("Saving model...")
