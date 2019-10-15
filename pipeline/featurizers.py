@@ -2,6 +2,8 @@ import re
 import string
 import warnings
 warnings.filterwarnings('once')
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 
 import nltk
 from nltk.corpus import wordnet

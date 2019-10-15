@@ -7,6 +7,8 @@ import subprocess as sb
 import sys
 import warnings
 warnings.filterwarnings('once')
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 
 import numpy as np
 import pandas as pd
@@ -16,7 +18,6 @@ from sagemaker_containers.beta.framework import (content_types,
                                                  modules, 
                                                  transformer, 
                                                  worker)
-from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import TruncatedSVD
 from sklearn.externals import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer

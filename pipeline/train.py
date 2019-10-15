@@ -1,5 +1,7 @@
 import warnings
 warnings.filterwarnings('once')
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 
 import numpy as np
 from scipy import stats
@@ -43,7 +45,6 @@ def randomized_grid_search(df, pipeline, objective_metric_name='roc_auc', n_iter
     scoring = {'accuracy': metrics.make_scorer(metrics.accuracy_score),
                'roc_auc': metrics.make_scorer(metrics.roc_auc_score),
                'precision': metrics.make_scorer(metrics.average_precision_score),
-               'fbeta':metrics.make_scorer(metrics.fbeta_score,beta=.5),
                'recall':metrics.make_scorer(metrics.recall_score)}
     
     X = df['text']
