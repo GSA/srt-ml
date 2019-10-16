@@ -57,11 +57,9 @@ def randomized_grid_search(df, pipeline, objective_metric_name='roc_auc', n_iter
                        "vectorizer__ngram_range": [(1,1), (1,2)],
                        "vectorizer__max_df": stats.uniform(.8,.95),
                        "vectorizer__sublinear_tf": [True, False],
-                       "select__n_components": stats.randint(100,200),
-                       "select__n_iter": stats.randint(5,20),
+                       "select__k": stats.randint(100,200),
                        "estimator__alpha": log_uniform(-5,2),
-                       "estimator__penalty": ['l2','l1','elasticnet'],
-                       "estimator__max_iter": stats.randint(10,50),
+                       "estimator__penalty": ['l2','l1','elasticnet'],                       
                        "estimator__loss": ['hinge', 'log', 'modified_huber', 'squared_hinge', 'perceptron']
                        }
     

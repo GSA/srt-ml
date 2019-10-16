@@ -18,9 +18,9 @@ from sagemaker_containers.beta.framework import (content_types,
                                                  modules, 
                                                  transformer, 
                                                  worker)
-from sklearn.decomposition import TruncatedSVD
 from sklearn.externals import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_selection import SelectKBest, chi2
 from sklearn.linear_model import SGDClassifier
 from sklearn.pipeline import Pipeline
 
@@ -87,7 +87,7 @@ if __name__ == '__main__':
                ('preprocessor', TextPreprocessor()),
                ('vectorizer', TfidfVectorizer(analyzer=str.split,
                                               lowercase=False)), #tokens are already lowercase
-               ('select', TruncatedSVD()),
+               ('select', SelectKBest(chi2)),
                ('estimator', SGDClassifier(class_weight="balanced"))])
     
     print("Fitting model...")
