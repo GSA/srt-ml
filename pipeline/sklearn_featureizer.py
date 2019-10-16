@@ -88,7 +88,9 @@ if __name__ == '__main__':
                ('vectorizer', TfidfVectorizer(analyzer=str.split,
                                               lowercase=False)), #tokens are already lowercase
                ('select', SelectKBest(chi2)),
-               ('estimator', SGDClassifier(class_weight="balanced"))])
+               ('estimator', SGDClassifier(class_weight="balanced",
+                                           max_iter=1000,
+                                           tol=1e-3))])
     
     print("Fitting model...")
     model = randomized_grid_search(
