@@ -96,7 +96,7 @@ if __name__ == '__main__':
     model = randomized_grid_search(
         df, 
         pipeline,
-        n_iter_search=1)
+        n_iter_search=30)
     print("Done fitting model!")
     
     print("Saving model...")
