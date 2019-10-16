@@ -72,7 +72,8 @@ def randomized_grid_search(df, pipeline, objective_metric_name='roc_auc', n_iter
                                        n_iter=n_iter_search, 
                                        cv=5,
                                        n_jobs=-1, 
-                                       verbose=1)
+                                       verbose=1,
+                                       random_state=123)
     
     random_search.fit(X_train, y_train)
     best_estimator = random_search.best_estimator_
