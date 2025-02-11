@@ -1,29 +1,36 @@
+#!/usr/bin/env python3
 import argparse
 import logging
-from srt_ml.predict.predict import Predict
 import json
-
+from srt_ml.predict.predict import Predict
 
 def predict_parser():
-    parser = argparse.ArgumentParser(description="Process multiple files using the Predict class.")
-    
+    """
+    Sets up and returns an argument parser for processing multiple files.
+    """
+    parser = argparse.ArgumentParser(
+        description="Process multiple files using the Predict class."
+    )
     parser.add_argument(
         "-m",
         "--model",
         default="clf_ajbuckingham_roc_auc.pkl",
-        help="Model name to use for prediction",
+        help="Model file name to use for prediction (relative to the binaries folder)",
     )
-    
     parser.add_argument(
         "-f",
         "--files",
         nargs="+",
         required=True,
-        help="List of files to process. (Full Path)",
+        help="List of files to process. (Provide full paths)",
     )
     return parser
 
 def main():
+    """
+    Main entry point for the CLI tool.
+    Parses command-line arguments, instantiates the Predict class, and processes the provided files.
+    """
     parser = predict_parser()
     args = parser.parse_args()
 
@@ -31,9 +38,11 @@ def main():
     logger = logging.getLogger(__name__)
 
     try:
-        predict = Predict(best_model_path=args.model)
-        file_predictions = predict.process_multiple_files(args.files)
-
+        # Instantiate the Predict class using the specified model file.
+        predictor = Predict(best_model_path=args.model)
+        # Process multiple files and obtain predictions.
+        file_predictions = predictor.process_multiple_files(args.files)
+        # Output the predictions as JSON.
         print(json.dumps(file_predictions))
     except Exception as e:
         logger.error(f"Error processing files: {e}")
