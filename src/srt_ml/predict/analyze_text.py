@@ -7,7 +7,7 @@ import dill as pickle  # Add this import
 
 # Get the absolute path to the model
 current_dir = Path(__file__).parent
-model_path = Path('/opt/ml/src/srt_ml/binaries/clf_ajbuckingham_roc_auc.pkl')  # Update model path
+model_path = current_dir.parent / 'binaries' / 'clf_ajbuckingham_roc_auc.pkl'  # Updated to relative path
 
 sys.path.append(str(current_dir.parent.parent))  # Add project root to Python path
 from srt_ml.predict.predict import Predict
