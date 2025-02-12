@@ -25,9 +25,16 @@ def main():
         description="Analyze raw text using Predict.analyze_text"
     )
     parser.add_argument(
-        "--text",
+        "--filename",
+        nargs='+',
         required=True,
-        help="The raw text to analyze"
+        help="One or more filenames corresponding to the texts"
+    )
+    parser.add_argument(
+        "--text",
+        nargs='+',
+        required=True,
+        help="One or more raw texts to analyze"
     )
     parser.add_argument(
         "--model",
@@ -36,16 +43,25 @@ def main():
     )
     args = parser.parse_args()
 
+    # Ensure we have a matching number of filenames and texts
+    if len(args.filename) != len(args.text):
+        raise ValueError("The number of filenames must match the number of text inputs.")
+
     # Determine the model path relative to this file's parent directory
     current_dir = Path(__file__).parent
     model_path = current_dir.parent / 'binaries' / args.model
 
-    # Instantiate Predict and call its analyze_text method
+    # Instantiate Predict and process each text input
     predictor = Predict(best_model_path=model_path)
-    prediction = predictor.analyze_text(args.text)
+    results = {}
 
-    # Output the prediction result as JSON
-    print(json.dumps({"prediction": prediction}))
+    # Loop through each filename and its corresponding text
+    for fname, text in zip(args.filename, args.text):
+        prediction = predictor.analyze_text(text)
+        results[fname] = prediction
+
+    # Output the prediction results as JSON
+    print(json.dumps({"predictions": results}))
 
 if __name__ == "__main__":
     main()
