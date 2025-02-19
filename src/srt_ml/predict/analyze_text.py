@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 import sys
 import json
+import warnings
 import logging
 from pathlib import Path
+from sklearn.exceptions import InconsistentVersionWarning
 from srt_ml.predict.predict import Predict
 
-# Use a logs directory within the user's home folder instead of /opt/ml/logs
+# Suppress scikit-learn InconsistentVersionWarning warnings
+warnings.filterwarnings("ignore", category=InconsistentVersionWarning)
+
+# Setup logging: use a logs directory within the user's home folder
 logs_dir = Path.home() / "srt_ml_logs"
 logs_dir.mkdir(parents=True, exist_ok=True)
-
-# Setup logging configuration
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -46,7 +49,9 @@ def main():
 
     for fname, text in documents.items():
         prediction = predictor.analyze_text(text)
-        results[fname] = prediction
+        # Convert boolean output to expected string
+        compliance_status = "compliant" if prediction is True else "non-compliant"
+        results[fname] = compliance_status
 
     # Output the prediction results as JSON to STDOUT
     print(json.dumps({"predictions": results}))
