@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
-import argparse
+import sys
 import json
+import warnings
 import logging
 from pathlib import Path
+from sklearn.exceptions import InconsistentVersionWarning
 from srt_ml.predict.predict import Predict
 
-# Use a logs directory within the user's home folder instead of /opt/ml/logs
+# Suppress scikit-learn InconsistentVersionWarning warnings
+warnings.filterwarnings("ignore", category=InconsistentVersionWarning)
+
+# Setup logging: use a logs directory within the user's home folder
 logs_dir = Path.home() / "srt_ml_logs"
 logs_dir.mkdir(parents=True, exist_ok=True)
-
-# Setup logging configuration
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -21,46 +24,36 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Analyze raw text using Predict.analyze_text"
-    )
-    parser.add_argument(
-        "--filename",
-        nargs='+',
-        required=True,
-        help="One or more filenames corresponding to the texts"
-    )
-    parser.add_argument(
-        "--text",
-        nargs='+',
-        required=True,
-        help="One or more raw texts to analyze"
-    )
-    parser.add_argument(
-        "--model",
-        default="clf_ajbuckingham_roc_auc.pkl",
-        help="Model file name (relative to the binaries folder)"
-    )
-    args = parser.parse_args()
+    # Read the entire input from STDIN
+    input_data = sys.stdin.read()
+    try:
+        data = json.loads(input_data)
+    except Exception as e:
+        logger.error("Failed to parse input JSON: " + str(e))
+        sys.exit(1)
 
-    # Ensure we have a matching number of filenames and texts
-    if len(args.filename) != len(args.text):
-        raise ValueError("The number of filenames must match the number of text inputs.")
+    # Expecting a JSON object with a "documents" property mapping filenames to texts
+    documents = data.get("documents", {})
+    if not documents:
+        logger.error("No documents provided in input.")
+        sys.exit(1)
 
     # Determine the model path relative to this file's parent directory
+    model_name = "clf_ajbuckingham_roc_auc.pkl"
     current_dir = Path(__file__).parent
-    model_path = current_dir.parent / 'binaries' / args.model
+    model_path = current_dir.parent / 'binaries' / model_name
 
     # Instantiate Predict and process each text input
     predictor = Predict(best_model_path=model_path)
     results = {}
 
-    # Loop through each filename and its corresponding text
-    for fname, text in zip(args.filename, args.text):
+    for fname, text in documents.items():
         prediction = predictor.analyze_text(text)
-        results[fname] = prediction
+        # Convert boolean output to expected string
+        compliance_status = "compliant" if prediction is True else "non-compliant"
+        results[fname] = compliance_status
 
-    # Output the prediction results as JSON
+    # Output the prediction results as JSON to STDOUT
     print(json.dumps({"predictions": results}))
 
 if __name__ == "__main__":
